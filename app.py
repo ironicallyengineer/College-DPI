@@ -37,5 +37,17 @@ class Student(db.Model):
 def home():
   return "Hello, DPI System! Database is connected."
 
+# --- MAIN EXECUTION ---
 if __name__ == '__main__':
-  app.run(debug=True)
+    # Yeh check karega ki database file 'site.db' pehle se hai ya nahi.
+    db_path = os.path.join(basedir, 'site.db')
+    if not os.path.exists(db_path):
+        print("Database not found, creating it...")
+        # Agar database nahi hai, toh yeh app ke context mein
+        # db.create_all() command chala dega, jo tables bana dega.
+        with app.app_context():
+            db.create_all()
+        print("Database created!")
+
+    # Ab server ko start karega
+    app.run(debug=True)
