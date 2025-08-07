@@ -1,24 +1,41 @@
-# Flask framework ko import kar rahe hain
-# Flask humein aasani se web server banane mein help karta hai
+# flask se zaroori cheezein import kar rahe hain
 from flask import Flask
+# Is naye library ko import kar rahe hain jo database mein help karega
+from flask_sqlalchemy import SQLAlchemy
+import os # Yeh operating system ke saath kaam karne mein help karta hai
 
-# Ek naya Flask application bana rahe hain
-# __name__ ek special Python variable hai jo Flask ko batata hai ki files kahan dhoondni hain
+# --- DATABASE SETUP ---
+# Project folder ka path nikal rahe hain
+basedir = os.path.abspath(os.path.dirname(__file__))
+
 app = Flask(__name__)
+# Flask ko bata rahe hain ki hamari database file kahan save karni hai
+# 'sqlite:///...' ka matlab hai ki hum SQLite database use kar rahe hain
+# 'site.db' hamari database file ka naam hoga
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'site.db')
+# Yeh extra feature ko disable kar rahe hain jisse warning na aaye
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Yeh ek "route" hai. Yeh batata hai ki jab koi browser mein
-# hamari website ka main page (जैसे http://127.0.0.1:5000/) kholeta hai,
-# toh kya karna hai.
+# Database object (db) bana rahe hain. Isi object ke through hum saare database operations karenge.
+db = SQLAlchemy(app)
+
+# --- DATABASE MODEL DEFINITION ---
+# Yahan hum define kar rahe hain ki hamare 'Student' table mein kya-kya information hogi.
+# Yeh ek blueprint jaisa hai.
+class Student(db.Model):
+    id = db.Column(db.Integer, primary_key=True) # Har student ke liye ek unique ID
+    usn = db.Column(db.String(20), unique=True, nullable=False) # University Seat Number, unique hona chahiye
+    name = db.Column(db.String(100), nullable=False) # Student ka naam
+    phone_number = db.Column(db.String(15), unique=True, nullable=False) # Phone number, unique hona chahiye
+
+    # Yeh function batata hai ki jab hum ek Student object ko print karein toh kya dikhe
+    def __repr__(self):
+        return f"Student('{self.usn}', '{self.name}')"
+
+# --- API ROUTES ---
 @app.route('/')
 def home():
-  # Yeh function chalega aur browser ko yeh text wapas bhejega
-  return "Hello, DPI System!"
+  return "Hello, DPI System! Database is connected."
 
-# Yeh check karta hai ki kya humne is file ko seedhe run kiya hai
-# (na ki kisi aur file se import kiya hai).
-# Agar haan, toh yeh server ko start kar dega.
 if __name__ == '__main__':
-  # app.run() server ko start karta hai.
-  # debug=True ka matlab hai ki agar hum code mein koi change karke save karte hain,
-  # toh server apne aap restart ho jayega. Yeh development ke liye bahut useful hai.
   app.run(debug=True)
